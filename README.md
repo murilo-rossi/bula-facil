@@ -1,11 +1,9 @@
 ## Como executar
 
-Pré-requisitos
+Pré-requisitos:
 
 Node.js
-
 npm (geralmente instalado junto com o Node.js)
-
 O aplicativo Expo Go em seu smartphone (iOS ou Android).
 
 
