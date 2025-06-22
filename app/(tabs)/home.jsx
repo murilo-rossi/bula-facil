@@ -16,9 +16,8 @@ export default function HomeScreen() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        {/* Espaço reservado para a logo */}
         <Image
-          source={require('../../assets/images/logo-placeholder.png')} // Crie esta imagem
+          source={require('../../assets/images/logo.png')}
           style={styles.logo}
         />
         <Text style={styles.title}>Seja bem-vindo ao BulaFacil</Text>
