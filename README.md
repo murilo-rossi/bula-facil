@@ -1,11 +1,11 @@
 ## Como executar
 
-1. Baixe os arquivos ou clone o repositório.
+1. Baixe todos os arquivos em uma pasta ou clone o repositório.
 
 2. Acesse a pasta do projeto
 
    ```bash
-   cd BulaFacil
+   cd BulaFacil (Ou diretório que está o aplicativo)
    ```
    
 4. Instale as dependências
