@@ -1,14 +1,14 @@
-import { Stack } from 'expo-router';
 import { UserPanelProvider } from '../context/UserPanelContext';
+import { Slot } from 'expo-router';
+
+function RootLayoutNav() {
+  return <Slot />;
+}
 
 export default function RootLayout() {
   return (
     <UserPanelProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="search-results" />
-        <Stack.Screen name="drug-details/[id]" />
-      </Stack>
+      <RootLayoutNav />
     </UserPanelProvider>
   );
 }

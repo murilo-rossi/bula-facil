@@ -1,5 +1,5 @@
-import { Tabs } from 'expo-router';
 import { FontAwesome5 } from '@expo/vector-icons';
+import { Tabs } from 'expo-router';
 import { COLORS } from '../../constants/colors';
 
 export default function TabsLayout() {
@@ -7,7 +7,7 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: COLORS.primary,
-        headerShown: false, // O cabeçalho será gerenciado por cada Stack interna
+        headerShown: false,
       }}
     >
       <Tabs.Screen
