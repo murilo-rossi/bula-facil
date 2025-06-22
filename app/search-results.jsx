@@ -1,6 +1,6 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import AlertBox from '../components/AlertBox';
 import { COLORS } from '../constants/colors';
 import { MEDICAMENTOS } from '../constants/data';
@@ -17,6 +17,7 @@ export default function SearchResultsScreen() {
   const { query } = useLocalSearchParams();
   const router = useRouter();
   const { userDrugs } = useUserPanel();
+  const [newQuery, setNewQuery] = useState('');
 
   const [results, setResults] = useState({ exact: [], similar: [], forSymptom: [] });
   const [symptomAlert, setSymptomAlert] = useState(null);
@@ -24,7 +25,6 @@ export default function SearchResultsScreen() {
   useEffect(() => {
     const lowerCaseQuery = query.toLowerCase();
 
-    // Funcionalidade 1: Dividir resultados
     const exactMatch = MEDICAMENTOS.filter(m => m.name.toLowerCase() === lowerCaseQuery);
     const forSymptomMatch = MEDICAMENTOS.filter(m => m.indications.keywords.includes(lowerCaseQuery));
     
@@ -36,7 +36,7 @@ export default function SearchResultsScreen() {
     
     setResults({ exact: exactMatch, similar: similarMatch, forSymptom: forSymptomMatch });
 
-    // Funcionalidade 4: Alerta de sintoma
+    // Alerta de sintoma
     const conflictingDrugs = userDrugs
       .filter(drug => drug.adverseReactions.symptoms.includes(lowerCaseQuery))
       .map(drug => drug.name)
@@ -49,6 +49,12 @@ export default function SearchResultsScreen() {
     }
 
   }, [query, userDrugs]);
+
+  const handleNewSearch = () => {
+    if (newQuery.trim()) {
+      router.replace({ pathname: '/search-results', params: { query: newQuery } });
+    }
+  };
 
   const renderSection = (title, data) => (
     <View style={styles.section}>
@@ -72,6 +78,21 @@ export default function SearchResultsScreen() {
     <View style={styles.container}>
       <Stack.Screen options={{ title: `Resultados para "${query}"`, headerBackTitle: 'Voltar' }} />
       {symptomAlert && <AlertBox message={symptomAlert} />}
+
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Fazer nova busca..."
+          value={newQuery}
+          onChangeText={setNewQuery}
+          onSubmitEditing={handleNewSearch}
+        />
+        <TouchableOpacity style={styles.button} onPress={handleNewSearch}>
+          <Text style={styles.buttonText}>Buscar</Text>
+        </TouchableOpacity>
+      </View>
+
+      {symptomAlert && <AlertBox message={symptomAlert} />}
       
       {renderSection(`Medicamentos com nome "${query}"`, results.exact)}
       {renderSection('Medicamentos similares', results.similar)}
@@ -80,7 +101,7 @@ export default function SearchResultsScreen() {
   );
 }
 
-// ... (Estilos no final do arquivo)
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   section: { marginBottom: 20, paddingHorizontal: 15 },
@@ -89,4 +110,31 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 16, fontWeight: 'bold' },
   cardCategory: { fontSize: 14, color: 'gray', marginTop: 4 },
   noResultText: { fontStyle: 'italic', color: 'gray' },
+  searchContainer: {
+        padding: 15,
+        backgroundColor: COLORS.white,
+        borderBottomWidth: 1,
+        borderBottomColor: COLORS.gray,
+    },
+    input: {
+        backgroundColor: COLORS.background,
+        paddingHorizontal: 15,
+        paddingVertical: 12,
+        borderRadius: 10,
+        fontSize: 16,
+        borderWidth: 1,
+        borderColor: COLORS.gray,
+    },
+    button: {
+        backgroundColor: COLORS.primary,
+        padding: 15,
+        borderRadius: 10,
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    buttonText: {
+        color: COLORS.white,
+        fontSize: 16,
+        fontWeight: 'bold'
+    },
 });
