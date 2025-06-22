@@ -1,7 +1,7 @@
 
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { COLORS } from '../../constants/colors';
 import { MEDICAMENTOS } from '../../constants/data';
 import { useUserPanel } from '../../context/UserPanelContext';
@@ -38,17 +38,23 @@ export default function DrugDetailsScreen() {
   }
 
   const handleAddPress = () => {
-    // Funcionalidade 5: Aviso prévio ao adicionar
-    const hasContraindication = drug.contraindications.conditions.some(cond => userConditions.includes(cond));
-    if (hasContraindication) {
-      Alert.alert(
-        "Atenção",
-        `Este medicamento não é indicado para uma de suas condições conhecidas (${drug.contraindications.conditions.filter(c => userConditions.includes(c)).join(', ')}). Deseja continuar?`,
-        [
-          { text: "Cancelar", style: "cancel" },
-          { text: "Continuar", onPress: () => setModalVisible(true) }
-        ]
-      );
+    const conflictingConditions = drug.contraindications.conditions.filter(cond => userConditions.includes(cond));
+
+    if (conflictingConditions.length > 0) {
+      if (Platform.OS === 'web') {
+        // Usando window.alert no navegador
+        window.alert(`Atenção: Contraindicação Encontrada\nEste medicamento não é indicado para uma de suas condições conhecidas (${conflictingConditions.join(', ')}).\n\nDeseja adicioná-lo mesmo assim?`);
+        setModalVisible(true);
+      } else {
+        Alert.alert(
+          "Atenção: Contraindicação Encontrada",
+          `Este medicamento não é indicado para uma de suas condições conhecidas (${conflictingConditions.join(', ')}).\n\nDeseja adicioná-lo mesmo assim?`,
+          [
+            { text: "Cancelar", style: "cancel" },
+            { text: "Continuar Mesmo Assim", onPress: () => setModalVisible(true) }
+          ]
+        );
+      }
     } else {
       setModalVisible(true);
     }
