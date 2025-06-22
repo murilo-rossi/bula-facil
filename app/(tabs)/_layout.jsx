@@ -7,23 +7,20 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: COLORS.primary,
-        headerStyle: { backgroundColor: COLORS.white },
-        headerTitleAlign: 'center',
+        headerShown: false, // O cabeçalho será gerenciado por cada Stack interna
       }}
     >
       <Tabs.Screen
-        name="home"
+        name="home" // Corresponde à pasta app/(tabs)/home
         options={{
-          title: 'BulaFacil',
-          tabBarLabel: 'Busca',
+          title: 'Busca',
           tabBarIcon: ({ color, size }) => <FontAwesome5 name="search" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
-        name="panel"
+        name="panel" // Corresponde ao arquivo app/(tabs)/panel.jsx
         options={{
           title: 'Meu Painel',
-          tabBarLabel: 'Painel',
           tabBarIcon: ({ color, size }) => <FontAwesome5 name="user-alt" size={size} color={color} />,
         }}
       />
