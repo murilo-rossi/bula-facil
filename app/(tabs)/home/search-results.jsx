@@ -1,6 +1,13 @@
+// Este arquivo define a tela de resultados de busca de medicamentos.
+// Permite ao usuário pesquisar medicamentos por nome ou sintoma, exibindo resultados exatos, similares e por indicação de sintomas.
+// Utiliza filtros para busca exata, parcial e por palavras-chave nas indicações dos medicamentos.
+// Também alerta o usuário caso algum sintoma buscado seja efeito colateral de medicamentos já cadastrados no painel.
+// Os resultados são exibidos em seções separadas e o usuário pode iniciar uma nova busca diretamente nesta tela.
+
+import Fuse from 'fuse.js';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import AlertBox from '../../../components/AlertBox';
 import { COLORS } from '../../../constants/colors';
 import { MEDICAMENTOS } from '../../../constants/data';
@@ -28,11 +35,19 @@ export default function SearchResultsScreen() {
     const exactMatch = MEDICAMENTOS.filter(m => m.name.toLowerCase() === lowerCaseQuery);
     const forSymptomMatch = MEDICAMENTOS.filter(m => m.indications.keywords.includes(lowerCaseQuery));
     
-    let similarMatch = [];
-    if (exactMatch.length > 0) {
-      const category = exactMatch[0].category;
-      similarMatch = MEDICAMENTOS.filter(m => m.category === category && m.id !== exactMatch[0].id);
-    }
+	// Parametros de busca fuzzy
+    const fuseOptions = {
+		keys: ['name'],
+		includeScore: true,
+		threshold: 0.3,
+	};
+	const fuse = new Fuse(MEDICAMENTOS, fuseOptions);
+	const fuzzyResults = fuse.search(lowerCaseQuery);
+
+	// Filtra os resultados para pegar apenas os itens, remover a correspondência exata e limitar a quantidade
+	const similarMatch = fuzzyResults
+		.map(result => result.item)
+		.filter(m => m.name.toLowerCase() !== lowerCaseQuery);
     
     setResults({ exact: exactMatch, similar: similarMatch, forSymptom: forSymptomMatch });
 
@@ -50,12 +65,15 @@ export default function SearchResultsScreen() {
 
   }, [query, userDrugs]);
 
+  // Componenete para iniciar uma nova busca
   const handleNewSearch = () => {
     if (newQuery.trim()) {
       router.replace({ pathname: 'home/search-results', params: { query: newQuery } });
+	  Keyboard.dismiss();
     }
   };
 
+  // Componente para renderizar cada seção de resultados
   const renderSection = (title, data) => (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
@@ -75,33 +93,33 @@ export default function SearchResultsScreen() {
   );
 
   return (
-    <View style={styles.container}>
-      <Stack.Screen options={{ title: `Resultados para "${query}"`, headerBackTitle: 'Voltar' }} />
-      {symptomAlert && <AlertBox message={symptomAlert} />}
+	<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+		<View style={styles.container}>
+		  <Stack.Screen options={{ title: `Resultados para "${query}"`, headerBackTitle: 'Voltar' }} />
+		  {symptomAlert && <AlertBox message={symptomAlert} />}
 
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Fazer nova busca..."
-          value={newQuery}
-          onChangeText={setNewQuery}
-          onSubmitEditing={handleNewSearch}
-        />
-        <TouchableOpacity style={styles.button} onPress={handleNewSearch}>
-          <Text style={styles.buttonText}>Buscar</Text>
-        </TouchableOpacity>
-      </View>
-
-      {symptomAlert && <AlertBox message={symptomAlert} />}
-      
-      {renderSection(`Medicamentos com nome "${query}"`, results.exact)}
-      {renderSection('Medicamentos similares', results.similar)}
-      {renderSection(`Medicamentos para sintoma "${query}"`, results.forSymptom)}
-    </View>
+		  <View style={styles.searchContainer}>
+			<TextInput
+			  style={styles.input}
+			  placeholder="Fazer nova busca..."
+			  value={newQuery}
+			  onChangeText={setNewQuery}
+			  onSubmitEditing={handleNewSearch}
+			/>
+			<TouchableOpacity style={styles.button} onPress={handleNewSearch}>
+			  <Text style={styles.buttonText}>Buscar</Text>
+			</TouchableOpacity>
+		  </View>
+		  
+			{renderSection(`Medicamentos com nome "${query}"`, results.exact)}
+			{renderSection('Medicamentos similares', results.similar)}
+			{renderSection(`Medicamentos para sintoma "${query}"`, results.forSymptom)}
+		</View>
+	</TouchableWithoutFeedback>
   );
 }
 
-
+// Estilos da tela de resultados de busca
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   section: { marginBottom: 20, paddingHorizontal: 15 },

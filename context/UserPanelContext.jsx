@@ -1,3 +1,7 @@
+// Este arquivo define o contexto global do painel do usuário para o aplicativo BulaFacil.
+// Gerencia os estados dos remédios e condições do usuário, permitindo adicionar, remover e editar esses dados.
+// Os dados são persistidos localmente usando AsyncStorage, garantindo que as informações do usuário sejam mantidas entre sessões.
+// Fornece funções para manipulação do painel e expõe o contexto para uso em toda a aplicação.
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -9,6 +13,7 @@ export const UserPanelProvider = ({ children }) => {
   const [userConditions, setUserConditions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Carrega os dados do AsyncStorage ao iniciar o app
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -31,6 +36,7 @@ export const UserPanelProvider = ({ children }) => {
     loadData();
   }, []);
 
+  // Salva os dados no AsyncStorage sempre que houver alteração
   useEffect(() => {
     // Não salva enquanto os dados iniciais ainda estão carregando
     if (!isLoading) {
@@ -46,24 +52,29 @@ export const UserPanelProvider = ({ children }) => {
     }
   }, [userDrugs, userConditions, isLoading]);
 
+  // Adiciona um remédio ao painel do usuário
   const addDrugToPanel = (drug, dose, frequency) => {
     setUserDrugs(prevDrugs => [...prevDrugs, { ...drug, dose, frequency }]);
   };
 
+  // Remove um remédio do painel do usuário
   const removeDrugFromPanel = (drugId) => {
     setUserDrugs(prevDrugs => prevDrugs.filter(d => d.id !== drugId));
   };
 
+  // Adiciona uma condição ao painel do usuário
   const addUserCondition = (condition) => {
     if (!userConditions.includes(condition)) {
       setUserConditions(prev => [...prev, condition]);
     }
   };
 
+  // Remove uma condição do painel do usuário
   const removeUserCondition = (condition) => {
     setUserConditions(prev => prev.filter(c => c !== condition));
   };
 
+  // Atualiza dose e frequência de um remédio no painel do usuário
   const updateDrugInPanel = (drugId, newDose, newFrequency) => {
     setUserDrugs(prevDrugs =>
       prevDrugs.map(drug =>
@@ -97,6 +108,7 @@ export const UserPanelProvider = ({ children }) => {
   );
 };
 
+// Hook para acessar o contexto do painel do usuário em qualquer componente
 export const useUserPanel = () => {
   return useContext(UserPanelContext);
 };

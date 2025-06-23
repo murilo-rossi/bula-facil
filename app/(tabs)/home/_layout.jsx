@@ -1,3 +1,10 @@
+// Este arquivo define o layout de navegação em pilha (Stack) para a aba "Busca".
+// Utiliza o componente Stack do expo-router para gerenciar as telas da navegação:
+// - index: tela inicial da busca (sem cabeçalho)
+// - search-results: tela de resultados de busca (com título e botão de voltar)
+// - drug-details/[id]: tela de detalhes do medicamento selecionado
+// Também define estilos personalizados para o cabeçalho das telas.
+
 import { Stack } from 'expo-router';
 import { COLORS } from '../../../constants/colors';
 
