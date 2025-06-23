@@ -1,3 +1,8 @@
+// Este arquivo define a tela de detalhes de um medicamento selecionado pelo usuário.
+// Exibe informações como indicações, reações adversas e contraindicações, cada uma com seu ícone.
+// Permite ao usuário adicionar o medicamento ao seu painel, informando dose e frequência.
+// Caso o medicamento seja contraindicado para alguma condição do usuário, exibe um alerta antes de permitir a adição.
+// Utiliza modal para entrada de dose e frequência, e trata navegação e contexto do painel do usuário.
 
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -37,6 +42,7 @@ export default function DrugDetailsScreen() {
     return <Text>Medicamento não encontrado.</Text>;
   }
 
+  // Função para tratar a adição do medicamento ao painel, verificando contraindicações
   const handleAddPress = () => {
     const conflictingConditions = drug.contraindications.conditions.filter(cond => userConditions.includes(cond));
 
@@ -60,6 +66,7 @@ export default function DrugDetailsScreen() {
     }
   };
 
+  // Confirma a adição do medicamento ao painel do usuário
   const confirmAddDrug = () => {
     if (dose && frequency) {
       addDrugToPanel(drug, dose, frequency);
@@ -108,7 +115,7 @@ export default function DrugDetailsScreen() {
   );
 }
 
-// ... Estilos
+// Estilos da tela de detalhes do medicamento
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   drugName: { fontSize: 28, fontWeight: 'bold', textAlign: 'center', margin: 20, color: COLORS.text },

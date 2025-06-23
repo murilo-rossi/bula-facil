@@ -1,3 +1,9 @@
+// Este arquivo define a tela de resultados de busca de medicamentos.
+// Permite ao usuário pesquisar medicamentos por nome ou sintoma, exibindo resultados exatos, similares e por indicação de sintomas.
+// Utiliza filtros para busca exata, parcial e por palavras-chave nas indicações dos medicamentos.
+// Também alerta o usuário caso algum sintoma buscado seja efeito colateral de medicamentos já cadastrados no painel.
+// Os resultados são exibidos em seções separadas e o usuário pode iniciar uma nova busca diretamente nesta tela.
+
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -19,26 +25,57 @@ export default function SearchResultsScreen() {
   const { userDrugs } = useUserPanel();
   const [newQuery, setNewQuery] = useState('');
 
+  // Estado para armazenar os resultados da busca
   const [results, setResults] = useState({ exact: [], similar: [], forSymptom: [] });
+  // Estado para exibir alerta de sintoma relacionado a efeitos colaterais
   const [symptomAlert, setSymptomAlert] = useState(null);
 
   useEffect(() => {
-    const lowerCaseQuery = query.toLowerCase();
+    const lowerCaseQuery = query.toLowerCase().trim();
 
+    // Busca exata por nome
     const exactMatch = MEDICAMENTOS.filter(m => m.name.toLowerCase() === lowerCaseQuery);
-    const forSymptomMatch = MEDICAMENTOS.filter(m => m.indications.keywords.includes(lowerCaseQuery));
-    
+
+    // Busca por medicamentos que contenham o termo no nome (parcial)
+    const partialMatch = MEDICAMENTOS.filter(
+      m => m.name.toLowerCase().includes(lowerCaseQuery) && m.name.toLowerCase() !== lowerCaseQuery
+    );
+
+    // Busca por medicamentos para o sintoma (keywords nas indicações)
+    const forSymptomMatch = MEDICAMENTOS.filter(m =>
+      m.indications.keywords.some(keyword => keyword.includes(lowerCaseQuery))
+    );
+
+    // Busca por medicamentos similares (mesma categoria do resultado exato)
     let similarMatch = [];
     if (exactMatch.length > 0) {
       const category = exactMatch[0].category;
-      similarMatch = MEDICAMENTOS.filter(m => m.category === category && m.id !== exactMatch[0].id);
+      similarMatch = MEDICAMENTOS.filter(
+        m => m.category === category && m.id !== exactMatch[0].id
+      );
     }
-    
-    setResults({ exact: exactMatch, similar: similarMatch, forSymptom: forSymptomMatch });
 
-    // Alerta de sintoma
+    // Junta similares com os parciais, evitando duplicatas
+    const similarAndPartial = [
+      ...similarMatch,
+      ...partialMatch.filter(
+        pm => !similarMatch.some(sm => sm.id === pm.id) && !exactMatch.some(em => em.id === pm.id)
+      ),
+    ];
+
+    setResults({
+      exact: exactMatch,
+      similar: similarAndPartial,
+      forSymptom: forSymptomMatch,
+    });
+
+    // Alerta de sintoma: verifica se algum medicamento do painel possui o sintoma buscado como efeito colateral
     const conflictingDrugs = userDrugs
-      .filter(drug => drug.adverseReactions.symptoms.includes(lowerCaseQuery))
+      .filter(drug =>
+        drug.adverseReactions.symptoms.some(symptom =>
+          symptom.toLowerCase().includes(lowerCaseQuery)
+        )
+      )
       .map(drug => drug.name)
       .join(', ');
 
@@ -47,15 +84,16 @@ export default function SearchResultsScreen() {
     } else {
       setSymptomAlert(null);
     }
-
   }, [query, userDrugs]);
 
+  // Função para iniciar uma nova busca
   const handleNewSearch = () => {
     if (newQuery.trim()) {
       router.replace({ pathname: 'home/search-results', params: { query: newQuery } });
     }
   };
 
+  // Função para renderizar cada seção de resultados
   const renderSection = (title, data) => (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
@@ -101,7 +139,7 @@ export default function SearchResultsScreen() {
   );
 }
 
-
+// Estilos da tela de resultados de busca
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.background },
   section: { marginBottom: 20, paddingHorizontal: 15 },

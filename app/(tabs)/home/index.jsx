@@ -1,3 +1,8 @@
+// Este arquivo define a tela inicial da aba "Busca" do aplicativo BulaFacil.
+// Permite ao usuário pesquisar medicamentos ou sintomas através de um campo de busca.
+// Ao digitar e clicar em "Buscar", o usuário é redirecionado para a tela de resultados de busca.
+// Também exibe instruções de uso e o logo do aplicativo na parte superior da tela.
+
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -7,6 +12,7 @@ export default function HomeScreen() {
   const [query, setQuery] = useState('');
   const router = useRouter();
 
+  // Função para tratar a busca e redirecionar para a tela de resultados
   const handleSearch = () => {
     if (query.trim()) {
       router.push({ pathname: 'home/search-results', params: { query } });

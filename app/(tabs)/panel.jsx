@@ -1,3 +1,9 @@
+// Este arquivo define a tela "Meu Painel" do aplicativo.
+// Permite ao usuário gerenciar seus remédios e condições de saúde conhecidas.
+// Inclui funcionalidades para adicionar/remover condições, editar/remover remédios,
+// e exibe alertas caso algum remédio seja contraindicado para as condições do usuário.
+// Utiliza contexto para acessar e modificar o painel do usuário, além de componentes visuais do React Native.
+
 import React, { useState, useMemo } from 'react';
 import { 
     View, 
@@ -16,6 +22,7 @@ import { CONDICOES } from '../../constants/data';
 import AlertBox from '../../components/AlertBox';
 import { FontAwesome5 } from '@expo/vector-icons';
 
+// Componente principal da tela do painel do usuário
 export default function PanelScreen() {
     const { 
         userDrugs, 
@@ -35,7 +42,7 @@ export default function PanelScreen() {
     // --- ESTADOS PARA A BUSCA DE CONDIÇÕES ---
     const [conditionQuery, setConditionQuery] = useState('');
 
-    // Lógica para os alertas de contraindicação
+    // Lógica para exibir alertas de contraindicação de remédios
     const contraindicationAlerts = useMemo(() => {
         const alerts = new Set();
         userDrugs.forEach(drug => {
@@ -48,7 +55,7 @@ export default function PanelScreen() {
         return Array.from(alerts);
     }, [userDrugs, userConditions]);
 
-    // Lógica para as sugestões de condições a serem adicionadas
+    // Sugestões de condições para adicionar, filtrando as já existentes
     const conditionSuggestions = useMemo(() => {
         if (!conditionQuery) return [];
         return CONDICOES.filter(cond =>
@@ -60,6 +67,7 @@ export default function PanelScreen() {
 
     // --- FUNÇÕES DE MANIPULAÇÃO ---
 
+    // Abre o modal de edição de remédio
     const handleOpenEditModal = (drug) => {
         setEditingDrug(drug);
         setNewDose(drug.dose);
@@ -67,6 +75,7 @@ export default function PanelScreen() {
         setEditModalVisible(true);
     };
 
+    // Salva as alterações feitas no remédio
     const handleSaveChanges = () => {
         if (newDose && newFrequency) {
             updateDrugInPanel(editingDrug.id, newDose, newFrequency);
@@ -77,6 +86,7 @@ export default function PanelScreen() {
         }
     };
     
+    // Adiciona uma condição ao painel do usuário
     const handleAddCondition = (condition) => {
         addUserCondition(condition);
         setConditionQuery(''); // Limpa a busca após adicionar
@@ -181,6 +191,7 @@ export default function PanelScreen() {
     );
 }
 
+// Estilos da tela do painel
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: COLORS.background },
     section: { margin: 15, padding: 15, backgroundColor: COLORS.white, borderRadius: 10 },
