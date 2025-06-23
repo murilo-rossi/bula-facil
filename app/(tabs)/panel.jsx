@@ -121,7 +121,28 @@ export default function PanelScreen() {
                         placeholder="Digite para adicionar uma condição..."
                         value={conditionQuery}
                         onChangeText={setConditionQuery}
+                        onSubmitEditing={() => {
+                            if (
+                                conditionQuery.trim() &&
+                                !userConditions.includes(conditionQuery.trim())
+                            ) {
+                                handleAddCondition(conditionQuery.trim());
+                            }
+                        }}
                     />
+                    <TouchableOpacity
+                        style={styles.addConditionButton}
+                        onPress={() => {
+                            if (
+                                conditionQuery.trim() &&
+                                !userConditions.includes(conditionQuery.trim())
+                            ) {
+                                handleAddCondition(conditionQuery.trim());
+                            }
+                        }}
+                    >
+                        <Text style={styles.addConditionButtonText}>Adicionar</Text>
+                    </TouchableOpacity>
                     {conditionSuggestions.map(suggestion => (
                         <TouchableOpacity
                             key={suggestion}
@@ -204,6 +225,18 @@ const styles = StyleSheet.create({
     conditionInput: { borderWidth: 1, borderColor: COLORS.gray, borderRadius: 8, padding: 12, fontSize: 16 },
     suggestionItem: { padding: 12, backgroundColor: '#f8f9fa', borderBottomWidth: 1, borderBottomColor: COLORS.gray, borderLeftWidth: 1, borderLeftColor: COLORS.gray, borderRightWidth: 1, borderRightColor: COLORS.gray },
     suggestionText: { fontSize: 15, color: COLORS.primary },
+    addConditionButton: {
+        backgroundColor: COLORS.primary,
+        paddingVertical: 12,
+        borderRadius: 8,
+        marginTop: 10,
+        alignItems: 'center',
+    },
+    addConditionButtonText: {
+        color: COLORS.white,
+        fontWeight: 'bold',
+        fontSize: 14,
+    },
     
     // Estilos dos Remédios
     drugCard: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: COLORS.gray },
